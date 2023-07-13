@@ -19,7 +19,6 @@
   "dependencies": {
     "@ocdladefense/lib-http": "https://github.com/ocdladefense/node-lib-http",
     "@ocdladefense/lib-polyfill": "https://github.com/ocdladefense/node-lib-polyfill",
-    "@ocdladefense/lib-date": "https://github.com/ocdladefense/node-lib-date",
     "@ocdladefense/lib-mock": "file:./dev_modules/lib-mock"
   }
 }
