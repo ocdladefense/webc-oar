@@ -1,0 +1,25 @@
+{
+  "name": "@ocdladefense/webc-ors",
+  "version": "1.0.0",
+  "description": "Custom web component to display Google Calendar events.",
+  "browser": "src/WebcEvents.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocdladefense/webc-events.git"
+  },
+  "author": "José Bernal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ocdladefense/webc-events/issues"
+  },
+  "homepage": "https://github.com/ocdladefense/webc-events#readme",
+  "dependencies": {
+    "@ocdladefense/lib-http": "https://github.com/ocdladefense/node-lib-http",
+    "@ocdladefense/lib-polyfill": "https://github.com/ocdladefense/node-lib-polyfill",
+    "@ocdladefense/lib-date": "https://github.com/ocdladefense/node-lib-date",
+    "@ocdladefense/lib-mock": "file:./dev_modules/lib-mock"
+  }
+}

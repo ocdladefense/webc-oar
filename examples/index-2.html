@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testing Api</title>
+</head>
+
+<body>
+    <h1>Testing Mock Calendar api</h1>
+    <webc-events calendar-id="events@thebierelibrary.com" start-date="" end-date="" />
+    <!--
+    <div id="btlist">
+        <button id="button">Press me for default day!</button>
+        <button id="filter">Press me for custom filtering!</button>
+        <button id="min">Press me for every date after July 1st!</button>
+        <button id="max">Press me for every date before July 15th!</button>
+        <button id="tomorrow">Press me for today and tomorrow!</button>
+        <button id="invalid">Press me for invalid response!</button>
+    </div>
+    -->
+
+    <script type="module">
+        import Init from "./controller.js";
+
+        window.onload = Init;
+
+        /*
+        let btList = document.getElementById('btlist');
+        let children = btList.children;
+
+        for (var i = 0; i < children.length; i++) {
+            children[i].addEventListener("click", Init);
+        }
+        */
+
+        
+    </script>
+</body>
+
+</html>
