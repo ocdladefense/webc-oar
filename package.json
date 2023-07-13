@@ -1,5 +1,5 @@
 {
-  "name": "@ocdladefense/webc-ors",
+  "name": "@ocdladefense/webc-oar",
   "version": "1.0.0",
   "description": "Custom web component to display Google Calendar events.",
   "browser": "src/WebcEvents.js",
