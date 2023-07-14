@@ -2,7 +2,7 @@
   "name": "@ocdladefense/webc-oar",
   "version": "1.0.0",
   "description": "Custom web component to display Google Calendar events.",
-  "browser": "src/WebcEvents.js",
+  "browser": "src/WebcOar.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

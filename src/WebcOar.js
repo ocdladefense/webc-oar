@@ -1,29 +1,11 @@
 import { HttpClient } from "../node_modules/@ocdladefense/lib-http/HttpClient.js";
 import { Url } from "../node_modules/@ocdladefense/lib-http/Url.js";
-import { GoogleApisCalendarMock } from "../dev_modules/lib-mock/GoogleApisCalendarMock.js";
+import { OarApiMock } from "../dev_modules/lib-mock/OarAPIMock.js";
 import { ISODate } from "../dev_modules/lib-date/ISODate.js";
 import "../node_modules/@ocdladefense/lib-polyfill/Response.js";
-export { WebcEvents };
+export { WebcOars };
 
-// Pretending what the current environment looks like for this machine/application.
-const env = {
-    today: "2023-06-30",
-    season: "spring",
-    weather: "mostly sunny",
-    city: "Corvallis, OR",
-    displayErrors: true, // We can imagine sceniors where we might *want to dipslay a message to the user.
-};
-
-
-const GOOGLE_CALENDAR_EVENTS_ENDPOINT = "https://www.googleapis.com/calendar/v3/calendars";
-
-
-
-class WebcEvents extends HTMLElement {
-
-    startDate = null;
-
-    endDate = null;
+class WebcOarAPI extends HTMLElement {
 
     constructor() {
         super();
