@@ -36,13 +36,13 @@ class WebcOarAPI extends HTMLElement {
         const config = {};
         const client = new HttpClient(config);
 
-        let url = WebcOarAPI.queryByChapter(this.chapter, this.division, this.ruling);
+        let url = WebcOarAPI.queryByRuling(this.chapter, this.division, this.ruling);
         HttpClient.register("secure.sos.state.or.us", new OarApiMock());
 
         const req = new Request(url);
 
         const resp = await client.send(req);
-        resp.json()
+        resp
         .then(ruling => {
 
             if (ruling.error) {
@@ -60,12 +60,12 @@ class WebcOarAPI extends HTMLElement {
         });
     }
 
-    static queryByChapter(chapter, division, rule) {
+    static queryByRuling(chapter, division, rule) {
         // built-ins
 
         let url = OAR_ENDPOINT;
         url = new Url(url);
-        url.buildQuery("ruleNumber", chapter + '-' + division + '-' + rule);
+        url.buildQuery("ruleNumber", [chapter, division, rule].join('-'));
         url.buildQuery("TEST");
     
         return url.toString();
