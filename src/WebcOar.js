@@ -1,27 +1,30 @@
 import { HttpClient } from "../node_modules/@ocdladefense/lib-http/HttpClient.js";
 import { Url } from "../node_modules/@ocdladefense/lib-http/Url.js";
 import { OarApiMock } from "../dev_modules/lib-mock/OarAPIMock.js";
-import { ISODate } from "../dev_modules/lib-date/ISODate.js";
 import "../node_modules/@ocdladefense/lib-polyfill/Response.js";
-export { WebcOars };
+export { WebcOarAPI };
+
+const env = {
+    chapter: '213',
+    division: '002',
+    ruling: '0001',
+}
+
+const OAR_ENDPOINT = "https://secure.sos.state.or.us/oard/view.action";
 
 class WebcOarAPI extends HTMLElement {
 
     constructor() {
         super();
 
-        this.calendarId = this.getAttribute("calendar-id");
-
-        if (this.calendarId == null) {
-            console.error("REQUIRED_ATTRIBUTE_MISSING: calendar-id.");
-        }
-
-        this.startDate = this.getAttribute("start-date") || env.today;
-        this.endDate = this.getAttribute("end-date") || env.today;
+        this.chapter = this.getAttribute("chapter") || env.chapter;
+        this.division = this.getAttribute("division") || env.division;
+        this.ruling = this.getAttribute("ruling") || env.ruling;
     }
     
     // Called each time the element is appended to the window/another element
     async connectedCallback() {
+
         const shadow = this.attachShadow({ mode: "open" });
 
         const list = document.createElement("div");
@@ -33,40 +36,36 @@ class WebcOarAPI extends HTMLElement {
         const config = {};
         const client = new HttpClient(config);
 
-        let url = WebcEvents.queryByDateRange(this.calendarId, this.startDate, this.endDate);
-        HttpClient.register("www.googleapis.com", new GoogleApisCalendarMock());
+        let url = WebcOarAPI.queryByChapter(this.chapter, this.division, this.ruling);
+        HttpClient.register("secure.sos.state.or.us", new OarApiMock());
 
         const req = new Request(url);
 
         const resp = await client.send(req);
-        //wasn't working like this so went back to old way temporarily 
-        //await client.send(req)
         resp.json()
-        .then(events => {
+        .then(ruling => {
 
-            if (events.error) {
-                throw new Error(events.message, { cause: events });
+            if (ruling.error) {
+                throw new Error(ruling.message, { cause: ruling });
             }
-            console.log(events);
+            console.log(ruling);
 
-            this.list.innerHTML = this.render(events).join("\n");
+            this.list.innerHTML = this.render(ruling).join("<br>");
         })
         .catch(error => {
-            // alert('Error: ' + error.message);
             console.error(error);
-            if (env.displayErrors && error.cause.code == "RANGE_EMPTY") { // Might help the customer.
+            if (env.displayErrors && error.cause.code == "RANGE_EMPTY") {
                 this.list.innerHTML = "Free to Register";
             }
         });
     }
 
-    static queryByDateRange(calendarId, start = null, end = null) {
+    static queryByChapter(chapter, division, rule) {
         // built-ins
 
-        let url = GOOGLE_CALENDAR_EVENTS_ENDPOINT + "/" + calendarId + "/event";
+        let url = OAR_ENDPOINT;
         url = new Url(url);
-        url.buildQuery("timeMin", start);
-        url.buildQuery("timeMax", end);
+        url.buildQuery("ruleNumber", chapter + '-' + division + '-' + rule);
         url.buildQuery("TEST");
     
         return url.toString();
@@ -74,21 +73,13 @@ class WebcOarAPI extends HTMLElement {
 
     render(data) {
         // This is how we pass an identifier to map().
-        return data.length == 0 ? "No Events" : data.map(this.renderEvent); 
+        return data.length == 0 ? "No rulings match those identifiers." : data.map(this.renderRuling); 
     }
 
-    renderEvent(event, index) {
-        let startDate = new ISODate(event.start.date || event.start.dateTime)
-        let endDate = new ISODate(event.end.date || event.end.dateTime);
-        startDate = startDate.eventDate(event);
-        endDate = endDate.eventDate(event);
+    renderRuling(ruling, index) {
 
         return `<div key=${index}>
-            <h2>${event.summary}</h2>
-            <p>Location: ${event.location}</p>
-            <p>Description: ${event.description}</p>
-            <p>Start Date: ${startDate}</p>
-            <p>End Date: ${endDate}</p>
+            <p>${ruling}</p>
         </div>`;
     }
 
