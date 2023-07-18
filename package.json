@@ -20,5 +20,14 @@
     "@ocdladefense/lib-http": "https://github.com/ocdladefense/node-lib-http",
     "@ocdladefense/lib-polyfill": "https://github.com/ocdladefense/node-lib-polyfill",
     "@ocdladefense/lib-mock": "file:./dev_modules/lib-mock"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.18.13",
+    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-react": "^7.14.5",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-root-import": "^6.6.0",
+    "jsdoc": "^4.0.2"
   }
 }

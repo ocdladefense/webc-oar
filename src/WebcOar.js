@@ -1,9 +1,8 @@
-import { HttpClient } from "../node_modules/@ocdladefense/lib-http/HttpClient.js";
-import { Url } from "../node_modules/@ocdladefense/lib-http/Url.js";
-import { OarApiMock } from "../dev_modules/lib-mock/OarAPIMock.js";
-import { OarRuling } from "../dev_modules/lib-fetch/OarFetch.js";
-import { HttpCache } from "../node_modules/@ocdladefense/lib-http/HttpCache.js";
-import "../node_modules/@ocdladefense/lib-polyfill/Response.js";
+import { HttpClient } from "~/node_modules/@ocdladefense/lib-http/HttpClient.js";
+import { Url } from "~/node_modules/@ocdladefense/lib-http/Url.js";
+import { OarApiMock } from "~/node_modules/@ocdladefense/lib-mock/OarAPIMock.js";
+import { OarRule } from "./OarRule.js";
+import "~/node_modules/@ocdladefense/lib-polyfill/Response.js";
 export { WebcOarAPI };
 
 const env = {
@@ -44,7 +43,7 @@ class WebcOarAPI extends HTMLElement {
 
         const config = {};
         const client = new HttpClient(config);
-        let oarFetch = new OarRuling();
+        let oarFetch = new OarRule();
 
         let url = WebcOarAPI.queryByRuling(this.chapter, this.division, this.ruling);
         HttpClient.register("appdev.ocdla.org", new OarApiMock());

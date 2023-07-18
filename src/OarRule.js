@@ -1,6 +1,6 @@
-export { OarRuling };
+export { OarRule };
 
-class OarRuling {
+class OarRule {
     
     ruling = null;
     doc = null;
@@ -62,11 +62,11 @@ class OarRuling {
 
             let text = node.innerText;
 
-            if (OarRuling.isReference(text)) {
+            if (OarRule.isReference(text)) {
                 break;
             }
 
-            if (OarRuling.isHeader(text) && !OarRuling.headerAlreadyFilled()) {
+            if (OarRule.isHeader(text) && !OarRule.headerAlreadyFilled()) {
                 this.ruleHeader = text;
             } else {
                 this.ruleSections.push(text);
