@@ -4,7 +4,8 @@
   "description": "Custom web component to display Google Calendar events.",
   "browser": "src/WebcOar.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d dist"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,7 @@
   "dependencies": {
     "@ocdladefense/lib-http": "https://github.com/ocdladefense/node-lib-http",
     "@ocdladefense/lib-polyfill": "https://github.com/ocdladefense/node-lib-polyfill",
-    "@ocdladefense/lib-mock": "file:./dev_modules/lib-mock"
+    "@ocdladefense/lib-mock": "https://github.com/ocdladefense/node-lib-mock"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
