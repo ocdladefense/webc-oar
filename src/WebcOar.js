@@ -26,6 +26,11 @@ class WebcOarAPI extends HTMLElement {
         this.ruling = this.getAttribute("ruling") || env.ruling;
     }
     
+    // perhaps we can add the chapter, division, and ruling to some sort of global table, and with each new
+    // connected callback we check back to that table and if those attributes already exist then we wait for
+    // it to be filled in the table itself, that way we aren't calling multiple fetch requests with each
+    // new element that has the same attributes.
+
     // Called each time the element is appended to the window/another element
     async connectedCallback() {
 
@@ -48,13 +53,15 @@ class WebcOarAPI extends HTMLElement {
 
         const req = new Request(url);
 
+        let resp = await client.send(req);
+        /*
         let resp = OarRuling.getCache(req.url);
 
         if (resp == null) {
             resp = await client.send(req);
 
             OarRuling.setCache(req.url, resp);
-        }
+        }*/
 
         let doc = await oarFetch.load(resp);
         oarFetch.parse();
