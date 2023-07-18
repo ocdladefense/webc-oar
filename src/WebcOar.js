@@ -1,6 +1,8 @@
 import { HttpClient } from "../node_modules/@ocdladefense/lib-http/HttpClient.js";
 import { Url } from "../node_modules/@ocdladefense/lib-http/Url.js";
 import { OarApiMock } from "../dev_modules/lib-mock/OarAPIMock.js";
+import { OarRuling } from "../dev_modules/lib-fetch/OarFetch.js";
+import { HttpCache } from "../node_modules/@ocdladefense/lib-http/HttpCache.js";
 import "../node_modules/@ocdladefense/lib-polyfill/Response.js";
 export { WebcOarAPI };
 
@@ -10,7 +12,9 @@ const env = {
     ruling: '0001',
 }
 
-const OAR_ENDPOINT = "https://secure.sos.state.or.us/oard/view.action";
+const OAR_ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
+// https://secure.sos.state.or.us/oard/view.action
+// https://appdev.ocdla.org/books-online/oar.php?chapter=213&division=002&rule=0001
 
 class WebcOarAPI extends HTMLElement {
 
@@ -35,13 +39,28 @@ class WebcOarAPI extends HTMLElement {
 
         const config = {};
         const client = new HttpClient(config);
+        let oarFetch = new OarRuling();
 
         let url = WebcOarAPI.queryByRuling(this.chapter, this.division, this.ruling);
-        HttpClient.register("secure.sos.state.or.us", new OarApiMock());
+        HttpClient.register("appdev.ocdla.org", new OarApiMock());
+
+
 
         const req = new Request(url);
 
-        const resp = await client.send(req);
+        let resp = OarRuling.getCache(req.url);
+
+        if (resp == null) {
+            resp = await client.send(req);
+
+            OarRuling.setCache(req.url, resp);
+        }
+
+        let doc = await oarFetch.load(resp);
+        oarFetch.parse();
+        oarFetch.injectAnchors();
+        this.list.innerHTML = oarFetch.toString();
+        /*
         resp
         .then(ruling => {
 
@@ -58,6 +77,7 @@ class WebcOarAPI extends HTMLElement {
                 this.list.innerHTML = "Free to Register";
             }
         });
+        */
     }
 
     static queryByRuling(chapter, division, rule) {
@@ -65,8 +85,9 @@ class WebcOarAPI extends HTMLElement {
 
         let url = OAR_ENDPOINT;
         url = new Url(url);
-        url.buildQuery("ruleNumber", [chapter, division, rule].join('-'));
-        url.buildQuery("TEST");
+        url.buildQuery("chapter", chapter);
+        url.buildQuery("division", division);
+        url.buildQuery("rule", rule);
     
         return url.toString();
     }

@@ -1,11 +1,13 @@
-
+export { OarRuling };
 
 class OarRuling {
     
     ruling = null;
     doc = null;
-    static cache = {};
     loaded = false;
+
+    ruleHeader = null;
+    ruleSections = [];
 
     // needs to fetch from the site
     // https://secure.sos.state.or.us/oard/viewSingleRule.action
@@ -18,39 +20,76 @@ class OarRuling {
     // site does not return actual information when a fetch request is manually sent while in the site itself.
     // the resulting information is "Please enable javascript to view the page content."
 
-    // not sure if this cache will be used or the HttpCache
-    static getCached(ruling) {
-        return this.cache[ruling];
+    toString() {
+        const serializer = new XMLSerializer();
+        const list = document.createElement("div");
+
+        list.appendChild(this.ruleHeader);
+        for (const child in this.ruleSections) {
+            let childSection = this.ruleSections[child];
+            list.appendChild(childSection);
+        }
+
+        return serializer.serializeToString(list);
     }
 
     async load(resp) {
         if (this.loaded) { return Promise.resolve(this.doc); } // ?
 
-        return resp.arrayBuffer()
-            .then(function (buffer) {
-                const decoder = new TextDecoder("iso-8859-1");
-                return decoder.decode(buffer);
-            })
-            .then((html) => {
-                const parser = new DOMParser();
-                this.doc = parser.parseFromString(html, "text/html");
+        let html = await resp.text();
 
-                this.loaded = true;
-                return this.doc;
-            })
+        const parser = new DOMParser();
+        this.doc = parser.parseFromString(html, "text/html");
+
+        console.log(this.doc);
+
+        this.loaded = true;
+        return this.doc;
     }
 
     parse() {
         let content = this.doc.getElementById("content");
-        let contentChildren = [];
 
         // after getting content, go through children of element and save to array
         for (const child in content.children) {
-            if (content.children[child].tagName == "P") {
-                contentChildren.push(content.children[child].innerText);
+            let childContent = content.children[child];
+            
+            if (childContent.tagName != "P") {
+                continue;
+            }
+
+            if (child == 4) {
+                this.ruleHeader = childContent.innerText;
+            } else if (childContent.innerText.charAt(0) == "(") {
+                this.ruleSections.push(childContent.innerText);
             }
         }
-
-        return contentChildren;
     }
+
+    // this assumes that load and parse have been run
+    injectAnchors() {
+        var headerDiv = document.createElement('div');
+        headerDiv.setAttribute('id', "header");
+        headerDiv.style.fontWeight = "bold";
+        headerDiv.innerText = this.ruleHeader;
+
+        this.ruleHeader = headerDiv;
+
+        for (const child in this.ruleSections) {
+            let item = this.ruleSections[child];
+            let childHead = item.charAt(1);
+
+            var div = document.createElement('div');
+            div.setAttribute('id', "section-"+childHead);
+            div.innerText = item;
+
+            this.ruleSections[child] = div;
+        }
+
+        this.formatted = true;
+    }
+
+
+
+
 }
