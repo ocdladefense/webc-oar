@@ -9,6 +9,8 @@ class OarRuling {
     ruleHeader = null;
     ruleSections = [];
 
+    headerExpression = /^(\d{3}\-\d{3}\-\d{4})/g;
+
     // needs to fetch from the site
     // https://secure.sos.state.or.us/oard/viewSingleRule.action
     // the fetch request requires the combined chapter, division and ruling
@@ -51,19 +53,39 @@ class OarRuling {
         let content = this.doc.getElementById("content");
 
         // after getting content, go through children of element and save to array
-        for (const child in content.children) {
-            let childContent = content.children[child];
+        for (const index in content.children) {
+            let node = content.children[index];
             
-            if (childContent.tagName != "P") {
+            if (node.tagName != "P") {
                 continue;
             }
 
-            if (child == 4) {
-                this.ruleHeader = childContent.innerText;
-            } else if (childContent.innerText.charAt(0) == "(") {
-                this.ruleSections.push(childContent.innerText);
+            let text = node.innerText;
+
+            if (OarRuling.isReference(text)) {
+                break;
+            }
+
+            if (OarRuling.isHeader(text) && !OarRuling.headerAlreadyFilled()) {
+                this.ruleHeader = text;
+            } else {
+                this.ruleSections.push(text);
             }
         }
+    }
+
+    static isReference(text) {
+        text = text.toLowerCase();
+        return text.includes("statutory/other authority");
+    }
+
+    // check first
+    static isHeader(text) {
+        return text.search(this.headerExpression);
+    }
+
+    static headerAlreadyFilled() {
+        return this.ruleHeader != null;
     }
 
     // this assumes that load and parse have been run
