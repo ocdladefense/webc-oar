@@ -1,0 +1,16 @@
+{
+    "presets": [
+        "@babel/preset-react"
+    ],
+    "plugins": [
+        [
+          "babel-plugin-root-import",
+          {
+            "rootPathPrefix": "~/"
+          }
+        ],
+        ["inline-dotenv",{
+          "path": ".env"
+        }]
+      ]
+}
