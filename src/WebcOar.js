@@ -54,37 +54,11 @@ class WebcOarAPI extends HTMLElement {
         const req = new Request(url);
 
         let resp = await client.send(req);
-        /*
-        let resp = OarRuling.getCache(req.url);
-
-        if (resp == null) {
-            resp = await client.send(req);
-
-            OarRuling.setCache(req.url, resp);
-        }*/
 
         let doc = await oarFetch.load(resp);
         oarFetch.parse();
         oarFetch.injectAnchors();
         this.list.innerHTML = oarFetch.toString();
-        /*
-        resp
-        .then(ruling => {
-
-            if (ruling.error) {
-                throw new Error(ruling.message, { cause: ruling });
-            }
-            console.log(ruling);
-
-            this.list.innerHTML = this.render(ruling).join("<br>");
-        })
-        .catch(error => {
-            console.error(error);
-            if (env.displayErrors && error.cause.code == "RANGE_EMPTY") {
-                this.list.innerHTML = "Free to Register";
-            }
-        });
-        */
     }
 
     static queryByRuling(chapter, division, rule) {
