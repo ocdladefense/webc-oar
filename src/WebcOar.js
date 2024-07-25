@@ -1,64 +1,70 @@
-import { HttpClient } from "~/node_modules/@ocdladefense/lib-http/HttpClient.js";
-import { Url } from "~/node_modules/@ocdladefense/lib-http/Url.js";
-import { OarApiMock } from "~/node_modules/@ocdladefense/lib-mock/OarAPIMock.js";
+import { HttpClient } from "../../lib-http/HttpClient.js";
+import { Url } from "../../lib-http/Url.js";
+import { OarApiMock } from "../../lib-mock/OarApiMock.js";
 import { OarRule } from "./OarRule.js";
-import "~/node_modules/@ocdladefense/lib-polyfill/Response.js";
-export { WebcOarAPI };
+import "../../lib-polyfill/Response.js";
+export { WebcOar };
 
-const env = {
-    chapter: '213',
-    division: '002',
-    ruling: '0001',
-}
 
 const OAR_ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
 // https://secure.sos.state.or.us/oard/view.action
 // https://appdev.ocdla.org/books-online/oar.php?chapter=213&division=002&rule=0001
 
-class WebcOarAPI extends HTMLElement {
+class WebcOar extends HTMLElement {
+
+    chapter = null;
+
+    division = null;
+
+    rule = null;
+
 
     constructor() {
         super();
 
-        this.chapter = this.getAttribute("chapter") || env.chapter;
-        this.division = this.getAttribute("division") || env.division;
-        this.ruling = this.getAttribute("ruling") || env.ruling;
+        ["chapter","division","rule"].forEach((attr) => {
+            this[attr] = this.getAttribute(attr);
+        });
     }
     
-    // perhaps we can add the chapter, division, and ruling to some sort of global table, and with each new
-    // connected callback we check back to that table and if those attributes already exist then we wait for
-    // it to be filled in the table itself, that way we aren't calling multiple fetch requests with each
-    // new element that has the same attributes.
 
-    // Called each time the element is appended to the window/another element
+
+    // Called each time the element is appended to the window/another element.
     async connectedCallback() {
 
         const shadow = this.attachShadow({ mode: "open" });
 
         const list = document.createElement("div");
+        list.setAttribute("class", "statute");
+        const style = document.createElement("style");
+        style.innerText = WebcOar.getCss();
 
         this.list = list;
-        
-        this.shadowRoot.append(list);
+
+        this.shadowRoot.append(style, list);
 
         const config = {};
         const client = new HttpClient(config);
-        let oarFetch = new OarRule();
+        let rule = new OarRule();
 
-        let url = WebcOarAPI.queryByRuling(this.chapter, this.division, this.ruling);
+        let url = WebcOar.queryByRuling(this.chapter, this.division, this.rule);
         HttpClient.register("appdev.ocdla.org", new OarApiMock());
-
-
 
         const req = new Request(url);
 
         let resp = await client.send(req);
+        let doc = await rule.load(resp);
 
-        let doc = await oarFetch.load(resp);
-        oarFetch.parse();
-        oarFetch.injectAnchors();
-        this.list.innerHTML = oarFetch.toString();
+        rule.parse();
+        rule.injectAnchors();
+
+        let text = rule.toString();
+        // console.log(text);
+        console.log("WebcOar instance: ",this);
+        this.list.innerHTML = text;
     }
+
+
 
     static queryByRuling(chapter, division, rule) {
         // built-ins
@@ -72,16 +78,53 @@ class WebcOarAPI extends HTMLElement {
         return url.toString();
     }
 
-    render(data) {
-        // This is how we pass an identifier to map().
-        return data.length == 0 ? "No rulings match those identifiers." : data.map(this.renderRuling); 
-    }
 
-    renderRuling(ruling, index) {
 
-        return `<div key=${index}>
-            <p>${ruling}</p>
-        </div>`;
+    static getCss() {
+        return `
+        div[id*=section] {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .statute {
+            font-family: monospace;
+            border-left: 3px solid blue;
+            margin-left: 50px;
+            max-width: 80%;
+            padding-left: 20px;
+        }
+        .level-0 {
+            margin-left: 0px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .level-1 {
+            margin-left: 15px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .level-2 {
+            margin-left: 30px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .level-3 {
+            margin-left: 45px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .section-label:before {
+            content: "ORS ";
+        }
+        .section-label {
+            padding: 5px;
+            font-size:larger;
+            font-weight: bold;
+        }
+        `;
     }
 
 
