@@ -1,6 +1,6 @@
-export { OarRule };
 
-class OarRule {
+
+export default class OarRule {
     
     ruling = null;
     doc = null;
