@@ -1,5 +1,5 @@
-import HttpClient from "../../lib-http/HttpClient.js";
-import Url from "../../lib-http/Url.js";
+import HttpClient from "@ocdla/lib-http/HttpClient.js";
+import Url from "@ocdla/lib-http/Url.js";
 import OarRule from "./OarRule.js";
 
 

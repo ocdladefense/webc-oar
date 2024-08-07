@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/ocdladefense/webc-oar#readme",
   "dependencies": {
-    "@ocdla/lib-http": "^2.0.0"
+    "@ocdla/lib-http": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
