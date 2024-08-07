@@ -1,7 +1,5 @@
 #Ignore node modules
 node_modules/
-#Ignore lib-mock
-dev_modules/lib-mock
 
 
 # Ignore dist files.

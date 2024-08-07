@@ -1,16 +1,14 @@
 import { HttpClient } from "../../lib-http/HttpClient.js";
 import { Url } from "../../lib-http/Url.js";
-import { OarApiMock } from "../../lib-mock/OarApiMock.js";
 import { OarRule } from "./OarRule.js";
-import "../../lib-polyfill/Response.js";
-export { WebcOar };
+
 
 
 const OAR_ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
 // https://secure.sos.state.or.us/oard/view.action
 // https://appdev.ocdla.org/books-online/oar.php?chapter=213&division=002&rule=0001
 
-class WebcOar extends HTMLElement {
+export default class WebcOar extends HTMLElement {
 
     chapter = null;
 
@@ -48,7 +46,7 @@ class WebcOar extends HTMLElement {
         let rule = new OarRule();
 
         let url = WebcOar.queryByRuling(this.chapter, this.division, this.rule);
-        HttpClient.register("appdev.ocdla.org", new OarApiMock());
+        
 
         const req = new Request(url);
 
