@@ -46,7 +46,7 @@ export default class OarRule {
         console.log(this.doc);
 
         this.loaded = true;
-        return this.doc;
+        return this;
     }
 
     parse() {

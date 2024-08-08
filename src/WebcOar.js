@@ -2,84 +2,72 @@ import HttpClient from "@ocdla/lib-http/HttpClient.js";
 import Url from "@ocdla/lib-http/Url.js";
 import OarRule from "./OarRule.js";
 
-
-
 const OAR_ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
 // https://secure.sos.state.or.us/oard/view.action
 // https://appdev.ocdla.org/books-online/oar.php?chapter=213&division=002&rule=0001
 
 export default class WebcOar extends HTMLElement {
+  chapter = null;
 
-    chapter = null;
+  division = null;
 
-    division = null;
+  rule = null;
 
-    rule = null;
+  constructor() {
+    super();
 
+    ["chapter", "division", "rule"].forEach((attr) => {
+      this[attr] = this.getAttribute(attr);
+    });
+  }
 
-    constructor() {
-        super();
+  static async loadRule(chapter, division, ruleNum) {
+    const config = {};
+    const client = new HttpClient(config);
+    let rule = new OarRule();
 
-        ["chapter","division","rule"].forEach((attr) => {
-            this[attr] = this.getAttribute(attr);
-        });
-    }
-    
+    let url = WebcOar.queryByRule(chapter, division, ruleNum);
 
+    const req = new Request(url);
 
-    // Called each time the element is appended to the window/another element.
-    async connectedCallback() {
+    let resp = await client.send(req);
+    return await rule.load(resp);
+  }
 
-        const shadow = this.attachShadow({ mode: "open" });
+  // Called each time the element is appended to the window/another element.
+  async connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
 
-        const list = document.createElement("div");
-        list.setAttribute("class", "statute");
-        const style = document.createElement("style");
-        style.innerText = WebcOar.getCss();
+    const list = document.createElement("div");
+    list.setAttribute("class", "statute");
+    const style = document.createElement("style");
+    style.innerText = WebcOar.getCss();
 
-        this.list = list;
+    this.list = list;
 
-        this.shadowRoot.append(style, list);
+    this.shadowRoot.append(style, list);
 
-        const config = {};
-        const client = new HttpClient(config);
-        let rule = new OarRule();
+    let rule = await WebcOar.loadRule(this.chapter, this.division, this.rule);
+    rule.parse();
+    rule.injectAnchors();
 
-        let url = WebcOar.queryByRuling(this.chapter, this.division, this.rule);
-        
+    let text = (this.list.innerHTML = rule.toString());
+  }
 
-        const req = new Request(url);
+  static queryByRule(chapter, division, rule) {
+    // built-ins
 
-        let resp = await client.send(req);
-        let doc = await rule.load(resp);
+    let url = OAR_ENDPOINT;
+    url = new Url(url);
+    url.buildQuery("chapter", chapter);
+    url.buildQuery("division", division);
+    url.buildQuery("rule", rule);
 
-        rule.parse();
-        rule.injectAnchors();
+    return url.toString();
+  }
 
-        let text = rule.toString();
-        // console.log(text);
-        console.log("WebcOar instance: ",this);
-        this.list.innerHTML = text;
-    }
-
-
-
-    static queryByRuling(chapter, division, rule) {
-        // built-ins
-
-        let url = OAR_ENDPOINT;
-        url = new Url(url);
-        url.buildQuery("chapter", chapter);
-        url.buildQuery("division", division);
-        url.buildQuery("rule", rule);
-    
-        return url.toString();
-    }
-
-
-
-    static getCss() {
-        return `
+  static getCss() {
+    return `
         div[id*=section] {
             margin-top: 10px;
             margin-bottom: 5px;
@@ -123,7 +111,5 @@ export default class WebcOar extends HTMLElement {
             font-weight: bold;
         }
         `;
-    }
-
-
+  }
 }
