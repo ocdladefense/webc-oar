@@ -2,37 +2,31 @@ import HttpClient from "@ocdla/lib-http/HttpClient.js";
 import Url from "@ocdla/lib-http/Url.js";
 import OarRule from "./OarRule.js";
 
-const OAR_ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
+const ENDPOINT = "https://appdev.ocdla.org/books-online/oar.php";
 // https://secure.sos.state.or.us/oard/view.action
 // https://appdev.ocdla.org/books-online/oar.php?chapter=213&division=002&rule=0001
 
-export default class WebcOar extends HTMLElement {
+export default class WebcOar extends HTMLDivElement {
   chapter = null;
 
   division = null;
 
   rule = null;
 
+  // Used when labelling this section.
+  label = null;
+
+  static cache = {};
+
+
+
+
   constructor() {
     super();
-
-    ["chapter", "division", "rule"].forEach((attr) => {
-      this[attr] = this.getAttribute(attr);
-    });
+    this.ref = this.getAttribute("ref") && this.getAttribute("ref").split(" ")[1];
+    [this.chapter, this.division, this.rule] = this.ref.split("-").map(ref => ref.trim());
   }
 
-  static async loadRule(chapter, division, ruleNum) {
-    const config = {};
-    const client = new HttpClient(config);
-    let rule = new OarRule();
-
-    let url = WebcOar.queryByRule(chapter, division, ruleNum);
-
-    const req = new Request(url);
-
-    let resp = await client.send(req);
-    return await rule.load(resp);
-  }
 
   // Called each time the element is appended to the window/another element.
   async connectedCallback() {
@@ -47,23 +41,44 @@ export default class WebcOar extends HTMLElement {
 
     this.shadowRoot.append(style, list);
 
-    let rule = await WebcOar.loadRule(this.chapter, this.division, this.rule);
-    rule.parse();
-    rule.injectAnchors();
+    WebcOar.loadRule(this.chapter, this.division, this.rule)
+    .then(rule => {
+      rule.parse();
+      rule.injectAnchors();
 
-    let text = (this.list.innerHTML = rule.toString());
+      let text = (this.list.innerHTML = rule.toString());
+    });
   }
 
-  static queryByRule(chapter, division, rule) {
+
+
+  static loadRule(chapterNumber, division, rule) {
+
+    // If the promise that will eventually resolve to this.
+    return WebcOar.cache[chapterNumber.toString()] ||  (function(chapterNumber) {
+      let url = WebcOar.buildUrl(chapterNumber,division,rule);
+      const client = new HttpClient();
+      const req = new Request(url.toString());
+      const chapter = client.send(req)
+      .then(resp => OarRule.fromResponse(resp, chapterNumber));
+
+      WebcOar.cache[chapterNumber.toString()] = chapter;
+      return WebcOar.cache[chapterNumber.toString()];
+    })(chapterNumber);
+  }
+
+
+
+  static buildUrl(chapter, division, rule) {
     // built-ins
 
-    let url = OAR_ENDPOINT;
+    let url = ENDPOINT;
     url = new Url(url);
     url.buildQuery("chapter", chapter);
     url.buildQuery("division", division);
     url.buildQuery("rule", rule);
 
-    return url.toString();
+    return url;
   }
 
   static getCss() {

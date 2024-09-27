@@ -1,7 +1,16 @@
+// needs to fetch from the site
+// https://secure.sos.state.or.us/oard/viewSingleRule.action
+// the fetch request requires the combined chapter, division and ruling
+// inside of the request, we will receive the entire pages' contents (as HTML?)
+// we must parse the HTML/raw text and find the element with the 'content' ID
+// then from there, we have access to the content of the ruling, separated by headers and p tags
 
+// note: can't send a fetch request to https://secure.sos.state.or.us. 
+// site does not return actual information when a fetch request is manually sent while in the site itself.
+// the resulting information is "Please enable javascript to view the page content."
 
 export default class OarRule {
-    
+
     ruling = null;
     doc = null;
     loaded = false;
@@ -11,44 +20,26 @@ export default class OarRule {
 
     headerExpression = /^(\d{3}\-\d{3}\-\d{4})/g;
 
-    // needs to fetch from the site
-    // https://secure.sos.state.or.us/oard/viewSingleRule.action
-    // the fetch request requires the combined chapter, division and ruling
-    // inside of the request, we will receive the entire pages' contents (as HTML?)
-    // we must parse the HTML/raw text and find the element with the 'content' ID
-    // then from there, we have access to the content of the ruling, separated by headers and p tags
+
+
+    constructor(doc) {
+        this.doc = doc;
+    }
+
+    static fromResponse(resp) {
+
+        return resp.text()
+        .then(html => {
+
+            
+            const parser = new DOMParser();
+            let doc = parser.parseFromString(html, "text/html");
+            return new OarRule(doc);
+        });
+    }
+
+
     
-    // note: can't send a fetch request to https://secure.sos.state.or.us. 
-    // site does not return actual information when a fetch request is manually sent while in the site itself.
-    // the resulting information is "Please enable javascript to view the page content."
-
-    toString() {
-        const serializer = new XMLSerializer();
-        const list = document.createElement("div");
-
-        list.appendChild(this.ruleHeader);
-        for (const child in this.ruleSections) {
-            let childSection = this.ruleSections[child];
-            list.appendChild(childSection);
-        }
-
-        return serializer.serializeToString(list);
-    }
-
-    async load(resp) {
-        if (this.loaded) { return Promise.resolve(this.doc); } // ?
-
-        let html = await resp.text();
-
-        const parser = new DOMParser();
-        this.doc = parser.parseFromString(html, "text/html");
-
-        console.log(this.doc);
-
-        this.loaded = true;
-        return this;
-    }
-
     parse() {
         let content = this.doc.getElementById("content");
 
@@ -112,6 +103,18 @@ export default class OarRule {
     }
 
 
+    toString() {
+        const serializer = new XMLSerializer();
+        const list = document.createElement("div");
+
+        list.appendChild(this.ruleHeader);
+        for (const child in this.ruleSections) {
+            let childSection = this.ruleSections[child];
+            list.appendChild(childSection);
+        }
+
+        return serializer.serializeToString(list);
+    }
 
 
 }
