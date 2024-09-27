@@ -54,17 +54,18 @@ export default class WebcOar extends HTMLDivElement {
 
   static loadRule(chapterNumber, division, rule) {
 
+    let key = [chapterNumber, division, rule].join("-");
     // If the promise that will eventually resolve to this.
-    return WebcOar.cache[chapterNumber.toString()] ||  (function(chapterNumber) {
+    return WebcOar.cache[key] ||  (function(key) {
       let url = WebcOar.buildUrl(chapterNumber,division,rule);
       const client = new HttpClient();
       const req = new Request(url.toString());
       const chapter = client.send(req)
       .then(resp => OarRule.fromResponse(resp, chapterNumber));
 
-      WebcOar.cache[chapterNumber.toString()] = chapter;
-      return WebcOar.cache[chapterNumber.toString()];
-    })(chapterNumber);
+      WebcOar.cache[key] = chapter;
+      return WebcOar.cache[key];
+    })(key);
   }
 
 
